@@ -1,0 +1,51 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates all cloud resources.
+
+
+Parameters:
+  DemoProjectStage:
+    Description: Demmo project environment to deploy resources.
+    Type: String
+
+  DemoProjectKMSKey:
+    Type: String
+    Description: Instance encryption key
+
+
+Resources:
+  DemoProjectNetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Ref TemplateASGElasticsearch
+      Parameters:
+        DemoProjectStage: !Ref DemoProjectStage
+      Tags:
+        - Key: Name
+          Value: Value: !Sub ${DemoProjectStage}-DemoProjectNetworkStack
+  
+  DemoProjectPermissionsStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Ref TemplateASGElasticsearch
+      Parameters:
+        DemoProjectStage: !Ref DemoProjectStage
+      Tags:
+        - Key: Name
+          Value: Value: !Sub ${DemoProjectStage}-DemoProjectPermissionsStack
+
+  DemoProjectDatabaseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+        !Ref TemplateASGElasticsearch
+      Parameters:
+        DemoProjectStage: !Ref DemoProjectStage
+        DemoProjectKMSKey: !Ref DemoProjectKMSKey
+      Tags:
+        - Key: Name
+          Value: Value: !Sub ${DemoProjectStage}-DemoProjectDatabaseStack
+          

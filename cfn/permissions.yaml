@@ -1,0 +1,46 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates network resources
+
+
+Parameters:
+  DemoProjectStage:
+    Default: demo
+    Description: Demmo project environment to deploy resources.
+    Type: String
+
+
+Resources:
+  DemoProjectESEC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+
+  DemoProjectESEC2Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${DemoProjectStage}-DemoProjectESEC2Policy
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - 'ec2:*'
+              - 's3:*'
+              - 'logs:*'
+            Resource: "*"
+      Roles:
+        - !Ref DemoProjectESEC2Role
+
+  DemoProjectESEC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${DemoProjectStage}-DemoProjectESEC2InstanceProfile
+      Roles:
+        - !Ref DemoProjectESEC2Role

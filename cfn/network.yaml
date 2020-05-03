@@ -1,0 +1,89 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates network resources.
+
+
+Parameters:
+  DemoProjectStage:
+    Default: demo
+    Description: Demmo project environment to deploy resources.
+    Type: String
+
+
+Resources:
+  DemoProjectVPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: 10.0.0.0/16
+      Tags: 
+        - Key: Name
+          Value: !Sub ${DemoProjectStage}-VPC
+    
+  DemoProjectInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    DependsOn: DemoProjectVPC
+    Properties:
+      Tags: 
+        - 
+          Key: Name
+          Value: !Sub ${DemoProjectStage}-IGW
+
+  ProjectInternetGatewayConnection:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn: 
+      - DemoProjectInternetGateway
+      - DemoProjectVPC
+    Properties:
+      InternetGatewayId: !Ref DemoProjectInternetGateway
+      VpcId: !Ref DemoProjectVPC
+  
+  DemoProjectRouteTablePublic:
+    Type: AWS::EC2::RouteTable
+    DependsOn: 
+      - DemoProjectVPC
+    Properties:
+      VpcId: !Ref DemoProjectVPC
+      Tags: 
+        - 
+          Key: Name
+          Value: !Sub ${DemoProjectStage}-DemoProjectRouteTablePublic
+  
+  DemoProjectRouteTablePrivate:
+    Type: AWS::EC2::RouteTable
+    DependsOn: DemoProjectRouteTablePublic
+    Properties:
+      VpcId: !Ref DemoProjectVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${DemoProjectStage}-DemoProjectRouteTablePrivate 
+  
+  IGWRoute:
+    Type: AWS::EC2::Route
+    DependsOn: ProjectInternetGatewayConnection
+    Properties:
+      GatewayId: !Ref DemoProjectInternetGateway
+      RouteTableId: !Ref DemoProjectRouteTablePublic
+      DestinationCidrBlock: "0.0.0.0/0"
+
+  DemoProjectPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      VpcId: !Ref DemoProjectVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${DemoProjectStage}-DemoProjectPublicSubnet
+
+Outputs:
+  DemoProjectVPCOP:
+    Value: !Ref DemoProjectVPC
+    Export:
+      Name: DemoProjectVPCOutput
+
+  DemoProjectPublicSubnetOP:
+    Value: !Ref DemoProjectPublicSubnet
+    Export:
+      Name: DemoProjectPublicSubnetOutput
