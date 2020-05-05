@@ -33,7 +33,6 @@ Resources:
     Type: AWS::EC2::VPCGatewayAttachment
     DependsOn: 
       - DemoProjectInternetGateway
-      - DemoProjectVPC
     Properties:
       InternetGatewayId: !Ref DemoProjectInternetGateway
       VpcId: !Ref DemoProjectVPC
@@ -45,8 +44,7 @@ Resources:
     Properties:
       VpcId: !Ref DemoProjectVPC
       Tags: 
-        - 
-          Key: Name
+        - Key: Name
           Value: !Sub ${DemoProjectStage}-DemoProjectRouteTablePublic
 
   IGWRoute:

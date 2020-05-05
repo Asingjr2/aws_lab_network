@@ -8,7 +8,7 @@
 - aws cli
 
 ### Implementation
-- Access aws console and utilize templates in following order:
+- Access aws console and create stacks using provided templates in following order:
     - network.yaml
     - permissions.yaml
     - autoscaling.yaml

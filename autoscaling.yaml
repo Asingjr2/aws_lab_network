@@ -6,9 +6,8 @@ Description: Creates elastic load balancers for services.
 
 Parameters:
   DemoProjectStage:
-    Default: demo_asg_lc
     Type: String
-    Description: Name of project. 
+    Description: Enter stage of project 
     
   DemoProjectKeyPair:
     Type: AWS::EC2::KeyPair::KeyName
@@ -23,7 +22,7 @@ Parameters:
   
   DemoProjectInstanceProfile:
     Type: String
-    Description: Sample instance profile
+    Description: Enter instance profile
   
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -85,19 +84,9 @@ Resources:
       SecurityGroupIngress: 
         - CidrIp: 0.0.0.0/0
           Description: SSH
-          FromPort: 22
-          IpProtocol: tcp
-          ToPort: 22
-        - CidrIp: 0.0.0.0/0
-          Description: SSH
           FromPort: 80
           IpProtocol: tcp
           ToPort: 80
-        - CidrIp: 0.0.0.0/0
-          Description: SSH
-          FromPort: 443
-          IpProtocol: tcp
-          ToPort: 443
       Tags:
         - Key: Name
           Value: instance-DemoProjectSG
@@ -125,6 +114,7 @@ Resources:
           echo "<html><h1>HELLO SAMUS</h1></html>" > index.html
           service httpd start
           chkconfig httpd on
+          
   DemoProjectServiceASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
