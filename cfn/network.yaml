@@ -48,16 +48,7 @@ Resources:
         - 
           Key: Name
           Value: !Sub ${DemoProjectStage}-DemoProjectRouteTablePublic
-  
-  DemoProjectRouteTablePrivate:
-    Type: AWS::EC2::RouteTable
-    DependsOn: DemoProjectRouteTablePublic
-    Properties:
-      VpcId: !Ref DemoProjectVPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${DemoProjectStage}-DemoProjectRouteTablePrivate 
-  
+
   IGWRoute:
     Type: AWS::EC2::Route
     DependsOn: ProjectInternetGatewayConnection
@@ -76,6 +67,12 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${DemoProjectStage}-DemoProjectPublicSubnet
+
+  DemoProjectSubnetAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref DemoProjectRouteTablePublic
+      SubnetId: !Ref DemoProjectPublicSubnet
 
 Outputs:
   DemoProjectVPCOP:

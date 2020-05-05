@@ -1,0 +1,143 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates elastic load balancers for services.
+
+
+Parameters:
+  DemoProjectStage:
+    Default: demo_asg_lc
+    Type: String
+    Description: Name of project. 
+    
+  DemoProjectKeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+
+  DemoProjectVPCID:
+    Type: AWS::EC2::VPC::Id
+    Description: Enter VPC ID of Service Server
+
+  DemoProjectSubnetID:
+    Type: AWS::EC2::Subnet::Id
+    Description: Enter subnet id
+  
+  DemoProjectInstanceProfile:
+    Type: String
+    Description: Sample instance profile
+  
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+  
+  
+Resources:
+  DemoProjectELBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Demo ELB SG
+      GroupName: ELB for Demo SG
+      SecurityGroupIngress: 
+        - CidrIp: 0.0.0.0/0
+          Description: SSL port
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+        - CidrIp: 0.0.0.0/0
+          Description: SSL port
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      Tags:
+        - Key: Name
+          Value: DemoProjectELBSG
+      VpcId: !Ref DemoProjectVPCID
+
+  DemoProjectServiceELB:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      LoadBalancerName: DemoProjectServiceELB
+      Listeners:
+        - InstancePort: 80
+          InstanceProtocol: HTTP
+          LoadBalancerPort: 80
+          Protocol: HTTP
+      HealthCheck:
+        HealthyThreshold: 2
+        Interval: 5
+        Target: HTTP:80/index.html
+        Timeout: 3
+        UnhealthyThreshold: 4
+      Scheme: internet-facing
+      SecurityGroups: 
+        - !GetAtt DemoProjectELBSG.GroupId
+      Subnets: 
+        - !Ref DemoProjectSubnetID
+      Tags:
+        - Key: Name
+          Value: DemoProjectServiceELB
+      
+  DemoProjectSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Demo SG 
+      GroupName: !Sub "Demo SG ${AWS::StackName}"
+      VpcId: !Ref DemoProjectVPCID
+      SecurityGroupIngress: 
+        - CidrIp: 0.0.0.0/0
+          Description: SSH
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIp: 0.0.0.0/0
+          Description: SSH
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+        - CidrIp: 0.0.0.0/0
+          Description: SSH
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      Tags:
+        - Key: Name
+          Value: instance-DemoProjectSG
+
+  DemoProjectLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceMonitoring: True
+      InstanceType: t2.micro
+      KeyName: !Ref DemoProjectKeyPair
+      IamInstanceProfile: !Ref DemoProjectInstanceProfile
+      AssociatePublicIpAddress: True
+      LaunchConfigurationName: demo-projec-launch-configuration
+      SecurityGroups:
+        - !Ref DemoProjectSG
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          yum install httpd -y
+          cd /etc/httpd/conf
+          sed -i "s/Listen 80/Listen 80/g" httpd.conf
+          cd /var/www/html
+          echo "<html><h1>HELLO SAMUS</h1></html>" > index.html
+          service httpd start
+          chkconfig httpd on
+  DemoProjectServiceASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: DemoProjectServiceASG
+      VPCZoneIdentifier: 
+        - !Ref DemoProjectSubnetID
+      Cooldown: 600
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 1000
+      LaunchConfigurationName: !Ref DemoProjectLaunchConfig
+      LoadBalancerNames: 
+        - !Ref DemoProjectServiceELB
+      DesiredCapacity: 1
+      MaxSize: 2
+      MinSize: 1
+     

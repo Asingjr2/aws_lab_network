@@ -8,8 +8,10 @@
 - aws cli
 
 ### Implementation
-- update `start.sh` privelge to allow executions (LINUX)
-- execute `start.bat` file (WINDOWS)
+- Access aws console and utilize templates in following order:
+    - network.yaml
+    - permissions.yaml
+    - autoscaling.yaml
 
 ### AWS Resources
 - vpc
