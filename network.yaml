@@ -59,7 +59,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties: 
       VpcId: !Ref DemoProjectVPC
-      AvailabilityZone: us-east-1a
+      AvailabilityZone: us-east-2b
       CidrBlock: 10.0.1.0/24
       MapPublicIpOnLaunch: true
       Tags:
