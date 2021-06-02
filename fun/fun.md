@@ -1,6 +1,0 @@
-# ANIME ROCKS
-
-### BE HAPPY
-
-#### YURI ON ICE
-## COWBOYBEBOP

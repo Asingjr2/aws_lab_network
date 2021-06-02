@@ -111,7 +111,7 @@ Resources:
           cd /etc/httpd/conf
           sed -i "s/Listen 80/Listen 80/g" httpd.conf
           cd /var/www/html
-          echo "<html><h1>HELLO SAMUS</h1></html>" > index.html
+          echo "<html><h1>HELLO Samus</h1></html>" > index.html
           service httpd start
           chkconfig httpd on
           
